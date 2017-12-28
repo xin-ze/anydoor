@@ -2,10 +2,16 @@
   "name": "anydoor",
   "version": "1.0.0",
   "description": "Tiny NodeJS Static Server",
-  "main": "test.js",
+  "main": "build/index.js",
   "scripts": {
+    "lint": "eslint .",
+    "fix": "eslint --fix .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "pre-commit": [
+    "fix",
+    "lint"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zhounewz/anydoor.git"
@@ -17,7 +23,9 @@
   },
   "homepage": "https://github.com/zhounewz/anydoor#readme",
   "devDependencies": {
+    "babel-eslint": "^8.1.2",
     "eslint": "^4.14.0",
-    "eslint-config-standard": "^11.0.0-beta.0"
-  }
+    "pre-commit": "^1.2.2"
+  },
+  "dependencies": {}
 }
