@@ -5,8 +5,6 @@ const fs = require('fs');
 const config = require('./config/defaultConfig');
 
 const server = http.createServer((req, res) => {
-    console.info('== ', req.url);
-
     const filePath = path.join(config.root, req.url);
 
     fs.stat(filePath, (err, stats) => {
@@ -20,14 +18,7 @@ const server = http.createServer((req, res) => {
             res.statusCode = '200';
             res.setHeader('Content-Type', 'text/plain');
             fs.createReadStream(filePath).pipe(res);
-            // res.end()    // me error
         }else if(stats.isDirectory()){
-            // me error
-            // res.statusCode = '200';
-            // res.setHeader('Content-Type', 'text/plain');
-            // fs.readdir(filePath, (err, files) => {
-            //     res.end(files);
-            // })
             fs.readdir(filePath, (err, files) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'text/plain');
