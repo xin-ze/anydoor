@@ -8,6 +8,7 @@ const config = require('../src/config/defaultConfig');
 const mime = require('./mime');
 const compress = require('./compress');
 const range = require('./range');
+const isFresh = require('./cache');
 
 const tplPath = path.join(__dirname, '../src/template/dir.tpl');
 const source = fs.readFileSync(tplPath); // 1.只会执行一次 ; 2. fs读出来的是buffer, 如果想要得到string, 可以 fs.readFileSync(tplPath, 'utf-8');
@@ -21,6 +22,13 @@ module.exports = async function (req, res, filePath) {
             const contentType = mime(filePath);
             res.statusCode = '200';
             res.setHeader('Content-Type', contentType);
+
+            if(isFresh(stats, req, res)) {
+                res.statusCode = 304;
+                res.end();
+                return;
+            }
+
             let rs;
             const {code, start, end} = range(stats.size, req, res);
             if(code === 200){
