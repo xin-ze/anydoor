@@ -1,46 +1,27 @@
 const http = require('http');
-const path = require('path');
 const chalk = require('chalk');
-const fs = require('fs');
-const config = require('./config/defaultConfig');
+const path = require('path');
+const conf = require('./config/defaultConfig');
+const route = require('../helper/router');
+const openUrl = require('../helper/openUrl');
 
-const server = http.createServer((req, res) => {
-    console.info('== ', req.url);
+class Server {
+    constructor(config) {
+        this.conf = Object.assign({}, conf, config);    // 注意顺序
+    }
+    start() {
+        const server = http.createServer((req, res) => {
+            const filePath = path.join(this.conf.root, req.url);
+            route(req, res, filePath, this.conf);
+            
+        });
+        
+        server.listen(this.conf.port, this.conf.hostname, () => {
+            const addr = `http://${this.conf.hostname}:${this.conf.port}`;
+            console.info(`Server started at ${chalk.green(addr)}`);
+            openUrl(addr);
+        });
+    }
+}
 
-    const filePath = path.join(config.root, req.url);
-
-    fs.stat(filePath, (err, stats) => {
-        if(err) {
-            res.statusCode = '404';
-            res.setHeader('Content-Type', 'text/plain');
-            res.end(`${filePath} is not a directory or file`);
-            return;            
-        }
-        if(stats.isFile()) {
-            res.statusCode = '200';
-            res.setHeader('Content-Type', 'text/plain');
-            fs.createReadStream(filePath).pipe(res);
-            // res.end()    // me error
-        }else if(stats.isDirectory()){
-            // me error
-            // res.statusCode = '200';
-            // res.setHeader('Content-Type', 'text/plain');
-            // fs.readdir(filePath, (err, files) => {
-            //     res.end(files);
-            // })
-            fs.readdir(filePath, (err, files) => {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'text/plain');
-                res.end(files.join(','));
-            })
-        }
-
-    })
-
-    
-})
-
-server.listen(config.port, config.hostname, () => {
-    const addr = `http://${config.hostname}:${config.port}`;
-    console.info(`Server started at ${chalk.green(addr)}`)
-})
+module.exports = Server;

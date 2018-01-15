@@ -4,9 +4,7 @@ function refreshRes(stats, res) {
     const {maxAge, expires, cacheControl, lastModified, etag} = cache;
 
     if(expires) {
-        let val = (new Date(Date.now() + maxAge * 1000)).toUTCString();
-        console.warn("expires: ", val);
-        res.setHeader('Expires', val);
+        res.setHeader('Expires', (new Date(Date.now() + maxAge * 1000)).toUTCString());
     }
     if(cacheControl) {
         res.setHeader('Cache-Control', `public, max-age=${maxAge}`);
@@ -15,7 +13,7 @@ function refreshRes(stats, res) {
         res.setHeader('Last-Modified', stats.mtime.toUTCString());
     }
     if(etag) {
-        res.setHeader('ETag', `${stats.size}-${stats.mtime}`);
+        res.setHeader('ETag', `${stats.size}-${stats.mtime.toUTCString()}`); // mtime 需要转成字符串，否则在 windows 环境下会报错
     }
 }
 
@@ -28,12 +26,6 @@ module.exports = function isFresh(stats, req, res) {
     const lastModified = req.headers['if-modified-since']; // 小写
     const etag = req.headers['if-none-match'];
     
-    // if(!lastModified || lastModified !== res.getHeader('Last-Modified')) {
-    //     return false;
-    // }
-    // if(!etag || etag != res.getHeader('ETag')) {
-    //     return false;
-    // }
     if(!lastModified && !etag) {
         return false;
     }
@@ -47,4 +39,4 @@ module.exports = function isFresh(stats, req, res) {
     }
 
     return true;
-}
+};
